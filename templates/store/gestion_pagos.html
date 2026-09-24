@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <h2 class="mb-4">Gestión de Transferencias</h2>
+            <p class="text-muted">Aquí aparecen los pedidos que están esperando que confirmes si el dinero llegó a tu cuenta bancaria.</p>
+
+            {% if orders %}
+                <div class="list-group">
+                    {% for order in orders %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center p-4 mb-3 shadow-sm rounded border">
+                        <div>
+                            <h5 class="mb-1">Orden: {{ order.ticket_number }}</h5>
+                            <p class="mb-1">Cliente: {{ order.user.first_name }} {{ order.user.last_name }} ({{ order.user.email }})</p>
+                            <small class="text-muted">Monto a verificar: <strong>${{ order.total_amount }}</strong></small>
+                        </div>
+                        <form method="post" class="d-flex gap-2">
+                            {% csrf_token %}
+                            <input type="hidden" name="order_id" value="{{ order.id }}">
+                            <button type="submit" name="action" value="no_recibido" class="btn btn-outline-danger">Pago No Recibido</button>
+                            <button type="submit" name="action" value="recibido" class="btn btn-success">Pago Recibido</button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-success text-center p-5">
+                    <h4>¡Todo al día!</h4>
+                    <p class="mb-0">No hay transferencias pendientes de revisión.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

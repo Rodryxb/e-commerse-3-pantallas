@@ -1,0 +1,5 @@
+django>=4.2,<5.0
+django-environ
+Pillow
+requests
+psycopg2-binary

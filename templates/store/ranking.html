@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card bg-dark text-white text-center py-4 mb-4">
+    <h3>Próxima Actualización ATP</h3>
+    <h1 id="cronometro" class="display-4" style="color: var(--ao-neon); font-weight: bold;">Cargando...</h1>
+</div>
+
+<table class="table table-striped table-hover mt-4">
+    <thead class="table-dark">
+        <tr>
+            <th>Rank</th>
+            <th>Jugador</th>
+            <th>País</th>
+            <th>Puntos</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in rankings %}
+        <tr>
+            <td>{{ r.rank }}</td>
+            <td>{{ r.player_name }}</td>
+            <td>{{ r.country }}</td>
+            <td>{{ r.points }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+    const targetDate = {{ target_timestamp }};
+    const timerElement = document.getElementById('cronometro');
+    
+    const interval = setInterval(() => {
+        const now = new Date().getTime();
+        const distance = targetDate - now;
+        
+        if (distance < 0) {
+            clearInterval(interval);
+            timerElement.innerHTML = "Sincronizando nuevos datos oficiales...";
+            return;
+        }
+        
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        
+        timerElement.innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+    }, 1000);
+</script>
+{% endblock %}

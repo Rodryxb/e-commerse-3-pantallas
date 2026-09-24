@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <h2 class="text-capitalize m-0">{{ category }}</h2>
+    <div class="d-flex gap-3 align-items-center flex-wrap">
+        <form method="GET" class="d-flex align-items-center m-0">
+            {% if current_q %}
+                <input type="hidden" name="q" value="{{ current_q }}">
+            {% endif %}
+            <label class="me-2 text-muted text-nowrap d-none d-md-block">Ordenar por:</label>
+            <select name="sort" class="form-select" onchange="this.form.submit()" style="min-width: 180px;">
+                <option value="">Relevancia</option>
+                <option value="precio_asc" {% if current_sort == 'precio_asc' %}selected{% endif %}>Precio: Menor a Mayor</option>
+                <option value="precio_desc" {% if current_sort == 'precio_desc' %}selected{% endif %}>Precio: Mayor a Menor</option>
+            </select>
+        </form>
+        {% if user.is_staff %}
+            <a href="{% url 'product_create' %}" class="btn btn-primary text-nowrap">+ Añadir Producto</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+    {% for product in products %}
+    <div class="col">
+        <div class="card h-100 position-relative">
+            {% if product.discount_price %}
+                <span class="badge badge-oferta">OFERTA</span>
+            {% endif %}
+            
+            {% if product.image %}
+                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 250px; object-fit: cover;">
+            {% else %}
+                <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 250px;">Sin Imagen</div>
+            {% endif %}
+
+            <div class="card-body text-center d-flex flex-column">
+                <h5 class="card-title">{{ product.name }}</h5>
+                {% if product.discount_price %}
+                    <p class="text-muted text-decoration-line-through mb-0">${{ product.price }}</p>
+                    <h4 class="text-success">${{ product.discount_price }}</h4>
+                {% else %}
+                    <h4>${{ product.price }}</h4>
+                {% endif %}
+                <p class="text-muted small mb-3">Stock: {{ product.stock }}</p>
+
+                <div class="mt-auto">
+                    {% if user.is_staff %}
+                    <div class="mb-2 d-flex justify-content-center gap-2">
+                        <a href="{% url 'product_update' product.id %}" class="btn btn-sm btn-outline-secondary">Editar</a>
+                        <a href="{% url 'product_delete' product.id %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" action="/carrito/">
+                        {% csrf_token %}
+                        <input type="hidden" name="product_id" value="{{ product.id }}">
+                        <button class="btn btn-neon w-100 mt-2">Añadir al Carrito</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p>No hay productos en esta categoría.</p>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8 col-lg-6">
+        <div class="card p-4 border-success">
+            <div class="text-center mb-4">
+                <h2 class="text-success">¡Orden {{ order.ticket_number }} solicitada!</h2>
+                <p class="text-muted">Esperando pago para procesar el despacho.</p>
+            </div>
+            
+            <div class="alert alert-info">
+                <h5 class="alert-heading text-center mb-3">Enviar comprobante de transferencia</h5>
+                <hr>
+                <p class="mb-2"><strong>Datos de Transferencia Genéricos (Mercado Pago Chile)</strong></p>
+                <ul class="list-unstyled">
+                    <li><strong>Banco:</strong> Mercado Pago</li>
+                    <li><strong>Tipo de Cuenta:</strong> Cuenta Vista (o Prepago)</li>
+                    <li><strong>Número de Cuenta:</strong> 23456789K</li>
+                    <li><strong>RUT:</strong> 23.456.789-K</li>
+                    <li><strong>Nombre:</strong> Juan Pérez Prueba</li>
+                    <li><strong>Email:</strong> contacto@tuproyecto.cl</li>
+                </ul>
+                <hr>
+                <p class="mb-0 text-center small">Una vez validada la transferencia te llegará un correo con tu orden de envio.</p>
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="/cuenta/" class="btn btn-neon">Ver mis pedidos</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
