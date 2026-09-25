@@ -5,39 +5,108 @@
     <title>Tenis with Rodry</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎾</text></svg>">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --ao-navy: #0A192F;
-            --ao-blue: #004B87;
-            --ao-light: #EBF3FA;
-            --ao-neon: #CCFF00;
+            {% if active_store == 'futbol' %}
+            --ao-navy: #0d4a22;   /* Verde Oscuro */
+            --ao-blue: #166832;   /* Verde Vibrante */
+            --ao-light: #f2f7f4;  /* Gris Claro */
+            --ao-neon: #70c800;   /* Verde Neón/Lima */
+            {% elif active_store == 'meo_corte' %}
+            --ao-navy: #1a1a1a;   /* Negro/Gris muy oscuro */
+            --ao-blue: #2c2c2c;   /* Gris oscuro */
+            --ao-light: #f8f9fa;  /* Blanco hueso */
+            --ao-neon: #d4af37;   /* Dorado */
+            {% else %}
+            --ao-navy: #15092A;   /* Indigo/Morado muy oscuro */
+            --ao-blue: #2A1154;   /* Indigo vibrante para gradientes */
+            --ao-light: #F4F6F9;  /* Gris muy claro/Off-white */
+            --ao-neon: #00F0FF;   /* Cyan Brillante */
+            {% endif %}
         }
-        body { background-color: var(--ao-light); color: var(--ao-navy); }
-        .navbar, footer { background-color: var(--ao-navy) !important; }
+        body { background-color: var(--ao-light); color: var(--ao-navy); font-family: 'Montserrat', sans-serif; }
+        h1, h2, h3, h4, h5, h6, .navbar-brand { font-family: 'Montserrat', sans-serif; letter-spacing: -0.5px; }
+        .navbar, footer { background-color: var(--ao-navy) !important; border: none; }
         .navbar-brand, .nav-link { color: white !important; }
-        .btn-neon { background-color: var(--ao-neon); color: #000; font-weight: bold; border: none; }
-        .btn-neon:hover { background-color: #b3e600; }
-        .badge-oferta { background-color: var(--ao-neon); color: #000; position: absolute; top: 10px; right: 10px; }
+        .btn-neon { background-color: var(--ao-neon); color: #000; font-weight: bold; border: none; transition: all 0.3s ease; }
+        .btn-neon:hover { background-color: {% if active_store == 'futbol' %}#8efc00{% elif active_store == 'meo_corte' %}#e6c860{% else %}#00c7d4{% endif %}; transform: scale(1.05); }
+        .badge-oferta { background-color: var(--ao-neon); color: #000; position: absolute; top: 10px; right: 10px; z-index: 2; }
         .card { border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        
+        /* Animaciones para la barra de navegación (Endpoints) */
+        .navbar-nav .nav-link {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .navbar-nav .nav-link:hover {
+            color: var(--ao-neon) !important;
+            transform: translateY(-2px);
+            text-shadow: 0 0 5px {% if active_store == 'futbol' %}rgba(112,200,0,0.4){% elif active_store == 'meo_corte' %}rgba(212,175,55,0.4){% else %}rgba(0,240,255,0.4){% endif %};
+        }
+
+        /* Animaciones interactivas para tarjetas y fotos */
+        .hover-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .hover-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.2) !important;
+        }
+        .hover-zoom-img {
+            transition: transform 0.5s ease;
+        }
+        .hover-card:hover .hover-zoom-img {
+            transform: scale(1.1);
+        }
     </style>
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
+<body class="d-flex flex-column min-vh-100">
+    <nav class="navbar navbar-expand-lg navbar-dark py-3 shadow-sm">
         <div class="container">
-            <a class="navbar-brand" href="/">Tenis with Rodry</a>
+            <a class="navbar-brand fw-bolder fs-4 d-flex align-items-center" href="/" style="width: 250px;">
+                {% if active_store == 'futbol' %}
+                    <i class="bi bi-record-circle text-neon me-2" style="color: var(--ao-neon);"></i> Fútbol with Rodry
+                {% elif active_store == 'meo_corte' %}
+                    <i class="bi bi-gem text-neon me-2" style="color: var(--ao-neon);"></i> Meo Corte
+                {% else %}
+                    <i class="bi bi-vinyl-fill text-neon me-2" style="color: var(--ao-neon);"></i> Tennis with Rodry
+                {% endif %}
+            </a>
             <div class="collapse navbar-collapse">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link" href="{% url 'catalogo_todos' %}" style="color: var(--ao-neon) !important; font-weight: bold;">DE TODO</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/productos/raquetas/">Raquetas</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/productos/pelotas/">Pelotas</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/productos/zapatillas/">Zapatillas</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/productos/extras/">Extras</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/ranking/">Ranking ATP</a></li>
+                <ul class="navbar-nav me-auto gap-1 align-items-center ms-3">
+                    {% if active_store == 'futbol' %}
+                        <li class="nav-item"><a class="nav-link text-uppercase text-nowrap" href="{% url 'catalogo_todos' %}" style="font-size: 0.85rem; font-weight: 700; color: var(--ao-neon) !important; background: rgba(112,200,0,0.1); border-radius: 20px; padding: 5px 15px;">EXPLORAR</a></li>
+                        <li class="nav-item"><a class="nav-link text-nowrap" href="/productos/zapatos_futbol/" style="font-size: 0.9rem;">Botas</a></li>
+                        <li class="nav-item"><a class="nav-link text-nowrap" href="/productos/balones_futbol/" style="font-size: 0.9rem;">Balones</a></li>
+                        <li class="nav-item"><a class="nav-link text-nowrap" href="/productos/equipamiento/" style="font-size: 0.9rem;">Ropa</a></li>
+                        <li class="nav-item"><a class="nav-link text-nowrap" href="/productos/entrenamiento/" style="font-size: 0.9rem;">Entrenamiento</a></li>
+                        <li class="nav-item"><a class="nav-link text-nowrap" href="/productos/tabla_a/" style="font-size: 0.9rem;">Tabla A</a></li>
+                    {% elif active_store == 'meo_corte' %}
+                        <li class="nav-item"><a class="nav-link text-uppercase text-nowrap" href="{% url 'catalogo_todos' %}" style="font-size: 0.85rem; font-weight: 700; color: var(--ao-neon) !important; background: rgba(212,175,55,0.1); border-radius: 20px; padding: 5px 15px;">EXPLORAR</a></li>
+                        <li class="nav-item"><a class="nav-link text-nowrap" href="/productos/tillas/" style="font-size: 0.9rem;">Tillas</a></li>
+                        <li class="nav-item"><a class="nav-link text-nowrap" href="/productos/ropa_superior/" style="font-size: 0.9rem;">Ropa Superior</a></li>
+                        <li class="nav-item"><a class="nav-link text-nowrap" href="/productos/ropa_inferior/" style="font-size: 0.9rem;">Ropa Inferior</a></li>
+                        <li class="nav-item"><a class="nav-link text-nowrap" href="/productos/gorros/" style="font-size: 0.9rem;">Gorros</a></li>
+                        <li class="nav-item"><a class="nav-link text-nowrap" href="/productos/relojes/" style="font-size: 0.9rem;">Relojes</a></li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link text-uppercase text-nowrap" href="{% url 'catalogo_todos' %}" style="font-size: 0.85rem; font-weight: 700; color: var(--ao-neon) !important; background: rgba(0,240,255,0.1); border-radius: 20px; padding: 5px 15px;">EXPLORAR</a></li>
+                        <li class="nav-item"><a class="nav-link text-nowrap" href="/productos/raquetas/" style="font-size: 0.9rem;">Raquetas</a></li>
+                        <li class="nav-item"><a class="nav-link text-nowrap" href="/productos/pelotas/" style="font-size: 0.9rem;">Pelotas</a></li>
+                        <li class="nav-item"><a class="nav-link text-nowrap" href="/productos/zapatillas/" style="font-size: 0.9rem;">Zapatillas</a></li>
+                        <li class="nav-item"><a class="nav-link text-nowrap" href="/productos/accesorios/" style="font-size: 0.9rem;">Accesorios</a></li>
+                        <li class="nav-item"><a class="nav-link text-nowrap" href="/ranking/" style="font-size: 0.9rem;">Ranking ATP</a></li>
+                    {% endif %}
                 </ul>
                 
-                <form class="d-flex align-items-center me-3 my-2 my-lg-0" action="{% url 'catalogo_todos' %}" method="GET">
-                    <input class="form-control form-control-sm me-2" type="search" placeholder="Buscar producto..." aria-label="Buscar" name="q" value="{{ request.GET.q|default_if_none:'' }}">
-                    <button class="btn btn-sm btn-outline-light" type="submit">🔍</button>
+                <form class="d-flex align-items-center me-4 my-2 my-lg-0" action="{% url 'catalogo_todos' %}" method="GET" style="width: 250px;">
+                    <div class="input-group input-group-sm w-100">
+                        <input class="form-control rounded-start-pill border-0 px-3 bg-light" type="search" placeholder="Buscar producto..." aria-label="Buscar" name="q" value="{{ request.GET.q|default_if_none:'' }}">
+                        <button class="btn bg-white border-0 rounded-end-pill pe-3 text-muted" type="submit"><i class="bi bi-search"></i></button>
+                    </div>
                 </form>
 
                 <ul class="navbar-nav align-items-center">
@@ -66,16 +135,55 @@
                         </li>
                         {% endif %}
                         <li class="nav-item d-flex align-items-center ms-2">
-                            <a class="btn btn-neon" href="/carrito/">Carrito <span class="badge bg-dark">{{ cart_items_count }}</span></a>
+                            <a class="btn btn-neon text-nowrap d-flex align-items-center gap-2" href="/carrito/">Carrito <span class="badge bg-dark">{{ cart_items_count }}</span></a>
                         </li>
                     {% else %}
-                        <li class="nav-item"><a class="nav-link" href="/login/">Login</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/registro/">Registro</a></li>
+                        <li class="nav-item d-flex align-items-center ms-2">
+                            <a class="btn btn-outline-success btn-sm fw-bold px-3" href="/login/">Mi cuenta</a>
+                        </li>
+                        <li class="nav-item d-flex align-items-center ms-2">
+                            <a class="btn btn-success btn-sm fw-bold px-3" href="/registro/">Registrarme</a>
+                        </li>
                     {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
+
+    <!-- PORTALES FLOTANTES GLOBALES (STACKED) -->
+    <div class="d-none d-xl-flex flex-column gap-3" style="position: fixed; right: 20px; top: 50%; transform: translateY(-50%); z-index: 1000; width: 180px;">
+        
+        <!-- Portal Tenis -->
+        <a href="{% url 'switch_store' 'tenis' %}" class="text-decoration-none shadow hover-card" style="background: linear-gradient(135deg, #15092A 0%, #2A1154 100%); color: white; padding: 15px; border-radius: 12px; border: 2px solid {% if active_store == 'tenis' %}#00F0FF{% else %}rgba(0,240,255,0.3){% endif %}; text-align: center; display: flex; flex-direction: column; justify-content: space-between; height: 210px; {% if active_store == 'tenis' %}box-shadow: 0 0 15px rgba(0,240,255,0.4) !important;{% endif %}">
+            <div style="font-size: 1.8rem; line-height: 1;">🎾</div>
+            <div>
+                <h6 class="fw-bolder mb-1 text-white" style="font-size: 0.85rem; letter-spacing: 0.5px;">MUNDO TENIS</h6>
+                <p class="small text-light mb-0" style="opacity: 0.8; font-size: 0.7rem; line-height: 1.2;">Lo mejor para la cancha: raquetas, pelotas y más.</p>
+            </div>
+            <div class="btn rounded-pill w-100 fw-bold" style="background-color: #00F0FF; color: #15092A; border: none; padding: 6px 0; font-size: 0.75rem;">ENTRAR A TENIS</div>
+        </a>
+
+        <!-- Portal Fútbol -->
+        <a href="{% url 'switch_store' 'futbol' %}" class="text-decoration-none shadow hover-card" style="background: linear-gradient(135deg, #0d4a22 0%, #166832 100%); color: white; padding: 15px; border-radius: 12px; border: 2px solid {% if active_store == 'futbol' %}#70c800{% else %}rgba(112,200,0,0.3){% endif %}; text-align: center; display: flex; flex-direction: column; justify-content: space-between; height: 210px; {% if active_store == 'futbol' %}box-shadow: 0 0 15px rgba(112,200,0,0.4) !important;{% endif %}">
+            <div style="font-size: 1.8rem; line-height: 1;">⚽</div>
+            <div>
+                <h6 class="fw-bolder mb-1 text-white" style="font-size: 0.85rem; letter-spacing: 0.5px;">MUNDO FÚTBOL</h6>
+                <p class="small text-light mb-0" style="opacity: 0.8; font-size: 0.7rem; line-height: 1.2;">Accesorios, ropa oficial, botas de élite y mucho más.</p>
+            </div>
+            <div class="btn rounded-pill w-100 fw-bold" style="background-color: #ff6600; color: white; border: none; padding: 6px 0; font-size: 0.75rem;">ENTRAR A FÚTBOL</div>
+        </a>
+
+        <!-- Portal Meo Corte -->
+        <a href="{% url 'switch_store' 'meo_corte' %}" class="text-decoration-none shadow hover-card" style="background: linear-gradient(135deg, #1a1a1a 0%, #333 100%); color: white; padding: 15px; border-radius: 12px; border: 2px solid {% if active_store == 'meo_corte' %}#d4af37{% else %}rgba(212,175,55,0.3){% endif %}; text-align: center; display: flex; flex-direction: column; justify-content: space-between; height: 210px; {% if active_store == 'meo_corte' %}box-shadow: 0 0 15px rgba(212,175,55,0.4) !important;{% endif %}">
+            <div style="font-size: 1.8rem; line-height: 1;">💎</div>
+            <div>
+                <h6 class="fw-bolder mb-1 text-white" style="font-size: 0.85rem; letter-spacing: 0.5px;">MUNDO MEO CORTE</h6>
+                <p class="small text-light mb-0" style="opacity: 0.8; font-size: 0.7rem; line-height: 1.2;">Ropa de vestir, chaquetas, gorras y calzado urbano.</p>
+            </div>
+            <div class="btn rounded-pill w-100 fw-bold" style="background-color: #d4af37; color: #1a1a1a; border: none; padding: 6px 0; font-size: 0.75rem;">VER MEO CORTE</div>
+        </a>
+
+    </div>
     <div class="container mt-4 min-vh-100">
         {% if messages %}
             {% for message in messages %}

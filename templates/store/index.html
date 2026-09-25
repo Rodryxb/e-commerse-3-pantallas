@@ -1,24 +1,39 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class='text-center py-5'>
-    <h1>Bienvenido a Tenis with Rodry</h1>
-    <p class="text-muted">Tu tienda especialista en Chile.</p>
+<div class="hero-section text-center position-relative shadow-sm" style="background: linear-gradient(135deg, var(--ao-navy) 0%, var(--ao-blue) 100%); color: white; overflow: hidden; margin-top: -1.5rem; margin-left: calc(-50vw + 50%); width: 100vw; box-sizing: border-box; padding: 4rem 0;">
+    <div class="container position-relative z-1 py-1">
+        {% if active_store == 'futbol' %}
+            <h2 class="fw-bolder mb-2 text-uppercase" style="letter-spacing: 1.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.15); font-size: 2.8rem;">Fútbol with Rodry</h2>
+            <p class="mx-auto mb-0 fw-medium" style="max-width: 550px; font-size: 1.1rem; color: #EBF3FA; letter-spacing: 0.5px;">Lleva al maximo tu rendimiento con los mejores productos</p>
+        {% elif active_store == 'meo_corte' %}
+            <h2 class="fw-bolder mb-2 text-uppercase" style="letter-spacing: 1.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.15); font-size: 2.8rem;">Meo Corte</h2>
+            <p class="mx-auto mb-0 fw-medium" style="max-width: 550px; font-size: 1.1rem; color: #EBF3FA; letter-spacing: 0.5px;">Estilo urbano y exclusividad en cada prenda</p>
+        {% else %}
+            <h2 class="fw-bolder mb-2 text-uppercase" style="letter-spacing: 1.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.15); font-size: 2.8rem;">Tennis with Rodry</h2>
+            <p class="mx-auto mb-0 fw-medium" style="max-width: 550px; font-size: 1.1rem; color: #EBF3FA; letter-spacing: 0.5px;">Lleva al maximo tu rendimiento con los mejores productos</p>
+        {% endif %}
+    </div>
 </div>
 
-<div class="container mb-5">
-    <h3 class="mb-4 text-center">Compra por colección</h3>
+
+
+<div class="container mb-5 mt-5">
+    <h3 class="mb-5 text-center fw-bold text-dark">¿Por dónde empezamos? 🤔</h3>
     <div class="row text-center d-flex flex-nowrap overflow-auto py-3 justify-content-start justify-content-md-center">
         {% for card in cards %}
         <div class="col-auto px-4 text-center">
-            <a href="{{ card.url }}" class="text-decoration-none text-dark d-block">
-                {% if card.image %}
-                    <img src="{{ card.image.url }}" class="rounded-circle shadow-sm" style="width: 150px; height: 150px; object-fit: cover; border: 3px solid #eee;">
-                {% else %}
-                    <div class="rounded-circle shadow-sm bg-secondary d-flex align-items-center justify-content-center mx-auto" style="width: 150px; height: 150px; border: 3px solid #eee;">
-                        <span class="text-white small">Sin Foto</span>
-                    </div>
-                {% endif %}
-                <h6 class="mt-3 text-uppercase" style="letter-spacing: 0.5px;">{{ card.title }}</h6>
+            <a href="{{ card.url }}" class="text-decoration-none text-dark d-block hover-card p-2 rounded-4">
+                <div style="overflow: hidden; border-radius: 50%; width: 150px; height: 150px; margin: 0 auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                    {% if card.image %}
+                        <img src="{{ card.image.url }}" class="hover-zoom-img" style="width: 150px; height: 150px; object-fit: cover; border: 3px solid #fff; border-radius: 50%;">
+                    {% else %}
+                        <div class="bg-secondary d-flex align-items-center justify-content-center mx-auto hover-zoom-img" style="width: 150px; height: 150px; border: 3px solid #fff; border-radius: 50%;">
+                            <span class="text-white small">Sin Foto</span>
+                        </div>
+                    {% endif %}
+                </div>
+                <h6 class="mt-3 text-uppercase fw-bold mb-2" style="font-size: 0.85rem; letter-spacing: 0.5px; color: var(--ao-navy);">{{ card.title }}</h6>
+                <span class="badge rounded-pill text-dark px-4 py-2 mt-1 shadow-sm" style="background-color: var(--ao-neon); font-size: 0.8rem; font-weight: 700;">Ver Colección</span>
             </a>
             {% if user.is_staff %}
                 <a href="{% url 'category_update' card.id %}" class="btn btn-sm btn-outline-secondary mt-2">Editar Foto</a>
@@ -29,6 +44,275 @@
         {% endfor %}
     </div>
 <hr class="my-5">
+
+{% if featured_products %}
+<div class="container mb-5">
+    <h3 class="mb-4 text-center fw-bold">⭐ Productos Destacados</h3>
+    <div class="position-relative" id="featured-carousel-wrapper">
+        <!-- Carrusel -->
+        <div class="d-flex gap-4 justify-content-center align-items-stretch" id="featured-track">
+            {% for fp in featured_products %}
+            <div class="featured-slide" style="display: none;">
+                <a href="/producto/{{ fp.product.id }}/" class="text-decoration-none text-dark">
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100" style="width: 280px; transition: transform 0.3s;">
+                        {% if fp.product.image %}
+                            <img src="{{ fp.product.image.url }}" alt="{{ fp.product.name }}" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                            </div>
+                        {% endif %}
+                        <div class="card-body p-3">
+                            {% if fp.product.discount_price %}
+                                <span class="badge rounded-pill mb-2" style="background-color: var(--ao-neon); color: #000;">
+                                    -{{ fp.product.discount_percentage }}% OFF
+                                </span>
+                            {% endif %}
+                            <h6 class="fw-bold mb-1" style="font-size: 0.95rem;">{{ fp.product.name }}</h6>
+                            <div class="d-flex align-items-center gap-2 mt-2">
+                                {% if fp.product.discount_price %}
+                                    <span class="fw-bolder" style="color: var(--ao-navy); font-size: 1.1rem;">${{ fp.product.discount_price|floatformat:0 }}</span>
+                                    <span class="text-muted text-decoration-line-through small">${{ fp.product.price|floatformat:0 }}</span>
+                                {% else %}
+                                    <span class="fw-bolder" style="color: var(--ao-navy); font-size: 1.1rem;">${{ fp.product.price|floatformat:0 }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Barra de Progreso e Indicadores -->
+        <div class="d-flex flex-column align-items-center mt-4 gap-3">
+            <div id="featured-dots" class="d-flex gap-2"></div>
+            <div class="progress" style="height: 6px; width: 150px; border-radius: 10px; background-color: #e9ecef; overflow: hidden;">
+                <div id="featured-progress-bar" class="progress-bar" style="background-color: var(--ao-neon); width: 0%; transition: none;"></div>
+            </div>
+        </div>
+
+        <!-- Botones -->
+        <button onclick="moveFeatured(-1)" class="btn rounded-circle shadow position-absolute d-flex align-items-center justify-content-center hover-card"
+            style="top: 45%; left: -20px; transform: translateY(-50%); width: 45px; height: 45px; background: var(--ao-navy); color: white; border: none; z-index: 10;">
+            ‹
+        </button>
+        <button onclick="moveFeatured(1)" class="btn rounded-circle shadow position-absolute d-flex align-items-center justify-content-center hover-card"
+            style="top: 45%; right: -20px; transform: translateY(-50%); width: 45px; height: 45px; background: var(--ao-navy); color: white; border: none; z-index: 10;">
+            ›
+        </button>
+    </div>
+</div>
+{% endif %}
+
+<style>
+@keyframes slideFadeIn {
+    0% { opacity: 0; transform: scale(0.95) translateY(10px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+.slide-anim {
+    animation: slideFadeIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+</style>
+
+<script>
+(function() {
+    const slides = Array.from(document.querySelectorAll('.featured-slide'));
+    const total = slides.length;
+    if (total === 0) return;
+    const visible = Math.min(3, total);
+    let current = 0;
+    let intervalTimer;
+
+    const dotsContainer = document.getElementById('featured-dots');
+    const progressBar = document.getElementById('featured-progress-bar');
+    const dots = [];
+    
+    for (let i = 0; i < total; i++) {
+        const d = document.createElement('button');
+        d.style.cssText = 'width:12px;height:12px;border-radius:50%;border:none;background:#ccc;padding:0;cursor:pointer;transition:all 0.3s;';
+        d.onclick = () => goTo(i);
+        dotsContainer.appendChild(d);
+        dots.push(d);
+    }
+
+    function startProgress() {
+        progressBar.style.transition = 'none';
+        progressBar.style.width = '0%';
+        void progressBar.offsetWidth; // force reflow
+        progressBar.style.transition = 'width 5s linear';
+        progressBar.style.width = '100%';
+    }
+
+    function goTo(index) {
+        current = ((index % total) + total) % total;
+        render();
+        resetInterval();
+    }
+
+    function render() {
+        slides.forEach(s => {
+            s.style.display = 'none';
+            s.classList.remove('slide-anim');
+        });
+        
+        for (let i = 0; i < visible; i++) {
+            const idx = (current + i) % total;
+            slides[idx].style.display = 'block';
+            void slides[idx].offsetWidth; // force reflow for animation
+            slides[idx].classList.add('slide-anim');
+        }
+        
+        dots.forEach((d, i) => {
+            if (i === current) {
+                d.style.background = 'var(--ao-neon)';
+                d.style.transform = 'scale(1.3)';
+            } else {
+                d.style.background = '#ccc';
+                d.style.transform = 'scale(1)';
+            }
+        });
+    }
+
+    window.moveFeatured = function(dir) {
+        goTo(current + dir);
+    };
+
+    function resetInterval() {
+        clearInterval(intervalTimer);
+        startProgress();
+        intervalTimer = setInterval(() => goTo(current + 1), 5000);
+    }
+
+    render();
+    resetInterval();
+})();
+</script>
+
+{% if user.is_superuser %}
+<div class="container mb-4">
+    <div class="card border-0 rounded-4 shadow-sm overflow-hidden">
+        <div class="card-header d-flex justify-content-between align-items-center py-3 px-4" style="background: var(--ao-navy);">
+            <h5 class="mb-0 fw-bold text-white"><i class="bi bi-stars me-2" style="color: var(--ao-neon);"></i>Gestionar Productos Destacados</h5>
+            <span class="badge rounded-pill" style="background: var(--ao-neon); color: #000; font-size: 0.85rem;">
+                {{ featured_products|length }}/5 seleccionados
+            </span>
+        </div>
+        <div class="card-body p-4">
+            <div class="row g-4">
+                <!-- Columna izquierda: Productos actualmente destacados -->
+                <div class="col-md-5">
+                    <h6 class="fw-bold mb-3 text-muted text-uppercase" style="font-size: 0.8rem; letter-spacing: 1px;">✅ En vitrina ahora</h6>
+                    {% if featured_products %}
+                        <div class="d-flex flex-column gap-2" id="featured-current-list">
+                            {% for fp in featured_products %}
+                            <div class="d-flex align-items-center justify-content-between rounded-3 p-2 px-3" style="background: #f8f9fa; border: 1px solid #e9ecef;">
+                                <div class="d-flex align-items-center gap-2">
+                                    {% if fp.product.image %}
+                                        <img src="{{ fp.product.image.url }}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 8px;">
+                                    {% else %}
+                                        <div class="bg-secondary rounded-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                            <i class="bi bi-image text-white small"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <div class="fw-bold" style="font-size: 0.85rem;">{{ fp.product.name }}</div>
+                                        <div class="text-muted" style="font-size: 0.75rem;">${{ fp.product.price|floatformat:0 }}</div>
+                                    </div>
+                                </div>
+                                <form method="POST" action="{% url 'featured_remove' fp.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill" style="font-size: 0.75rem; padding: 2px 10px;">
+                                        <i class="bi bi-x"></i> Quitar
+                                    </button>
+                                </form>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-muted text-center py-4 rounded-3" style="background: #f8f9fa; border: 2px dashed #dee2e6;">
+                            <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                            <p class="mb-0 mt-2 small">Sin productos destacados aún.</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Columna derecha: Buscador para agregar -->
+                <div class="col-md-7">
+                    <h6 class="fw-bold mb-3 text-muted text-uppercase" style="font-size: 0.8rem; letter-spacing: 1px;">🔍 Agregar producto</h6>
+                    <div class="position-relative">
+                        <input type="text" id="featured-search-input" class="form-control rounded-3 border-0 shadow-sm px-3"
+                            placeholder="Buscar producto por nombre..."
+                            style="font-size: 0.9rem; background: #f8f9fa;"
+                            autocomplete="off">
+                        <div id="featured-search-results" class="position-absolute w-100 mt-1 rounded-3 shadow-sm border bg-white"
+                            style="z-index: 500; max-height: 300px; overflow-y: auto; display: none;"></div>
+                    </div>
+                    {% if featured_products|length >= 5 %}
+                    <div class="alert alert-warning mt-3 rounded-3 py-2 px-3" style="font-size: 0.85rem;">
+                        <i class="bi bi-exclamation-triangle me-1"></i> Ya tienes 5 productos. Quita uno para agregar otro.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+    const input = document.getElementById('featured-search-input');
+    const results = document.getElementById('featured-search-results');
+    if (!input) return;
+
+    let timer;
+    input.addEventListener('input', function() {
+        clearTimeout(timer);
+        const q = input.value.trim();
+        if (q.length < 1) { results.style.display = 'none'; return; }
+        timer = setTimeout(() => {
+            fetch(`/destacados/buscar/?q=${encodeURIComponent(q)}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.results.length === 0) {
+                        results.innerHTML = '<div class="p-3 text-muted small text-center">Sin resultados</div>';
+                    } else {
+                        results.innerHTML = data.results.map(p =>
+                            `<div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom"
+                                style="cursor:default; font-size: 0.85rem;">
+                                <div>
+                                    <div class="fw-bold">${p.name}</div>
+                                    <div class="text-muted small">SKU: ${p.sku} &bull; $${parseInt(p.price).toLocaleString()}</div>
+                                </div>
+                                <form method="POST" action="/destacados/agregar/" class="ms-2">
+                                    <input type="hidden" name="csrfmiddlewaretoken" value="${getCsrf()}">
+                                    <input type="hidden" name="product_id" value="${p.id}">
+                                    <button type="submit" class="btn btn-sm rounded-pill fw-bold"
+                                        style="background: var(--ao-neon); color: #000; font-size: 0.75rem; padding: 3px 14px;">
+                                        + Agregar
+                                    </button>
+                                </form>
+                            </div>`
+                        ).join('');
+                    }
+                    results.style.display = 'block';
+                });
+        }, 250);
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!input.contains(e.target) && !results.contains(e.target)) {
+            results.style.display = 'none';
+        }
+    });
+
+    function getCsrf() {
+        return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+    }
+})();
+</script>
+{% endif %}
+
 <div class="container mb-5">
     <h3 class="mb-4 text-center">Reseñas de nuestros clientes</h3>
     
@@ -46,7 +330,15 @@
                                     @{{ review.user.username }}
                                 {% endif %}
                             </h6>
-                            <small class="text-muted">{{ review.created_at|date:"d M Y" }}</small>
+                            <div class="d-flex align-items-center">
+                                <small class="text-muted">{{ review.created_at|date:"d M Y" }}</small>
+                                {% if user.is_staff %}
+                                <form method="POST" action="{% url 'eliminar_review' review.id %}" class="d-inline ms-2">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size: 0.75rem;"><i class="bi bi-trash"></i> Eliminar</button>
+                                </form>
+                                {% endif %}
+                            </div>
                         </div>
                         <p class="mb-2">
                             {% for i in "12345"|make_list %}

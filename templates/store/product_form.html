@@ -1,19 +1,170 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card p-4">
-            <h2>{% if object %}Editar Producto: {{ object.name }}{% else %}Añadir Nuevo Producto{% endif %}</h2>
-            <hr>
-            <form method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <div class="d-flex justify-content-between mt-4">
-                    <a href="javascript:history.back()" class="btn btn-outline-secondary">Cancelar</a>
-                    <button type="submit" class="btn btn-neon">Guardar Producto</button>
-                </div>
-            </form>
+<div class="row justify-content-center py-4">
+    <div class="col-md-9 col-lg-8">
+        <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+            <div class="card-header bg-navy text-white p-4" style="background-color: var(--ao-navy);">
+                <h3 class="mb-0 fw-bold">
+                    {% if form.instance.pk %}
+                        <i class="bi bi-pencil-square text-neon me-2" style="color: var(--ao-neon);"></i> Editar Producto: {{ form.instance.name }}
+                    {% else %}
+                        <i class="bi bi-plus-circle text-neon me-2" style="color: var(--ao-neon);"></i> Agregar Nuevo Producto
+                    {% endif %}
+                </h3>
+            </div>
+            
+            <div class="card-body p-5 bg-white">
+                <form method="post" enctype="multipart/form-data" id="productForm">
+                    {% csrf_token %}
+                    
+                    <div class="row g-4">
+                        <!-- Columna Izquierda -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">{{ form.name.label }}</label>
+                                {{ form.name }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">{{ form.sku.label }}</label>
+                                {{ form.sku }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold d-flex justify-content-between align-items-center">
+                                    {{ form.category.label }}
+                                    <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#categoryModal">
+                                        + Nueva
+                                    </button>
+                                </label>
+                                {{ form.category }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">{{ form.image.label }}</label>
+                                {{ form.image }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">{{ form.stock.label }}</label>
+                                {{ form.stock }}
+                            </div>
+                        </div>
+                        
+                        <!-- Columna Derecha -->
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">{{ form.price.label }}</label>
+                                {{ form.price }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold d-block">{{ form.discount_price.label }}</label>
+                                <div class="btn-group w-100 mb-2" role="group">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="applyDiscount(0.10)">10%</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="applyDiscount(0.20)">20%</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="applyDiscount(0.30)">30%</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="applyDiscount(0.50)">50%</button>
+                                </div>
+                                {{ form.discount_price }}
+                                <small class="text-muted mt-1 d-block"><i class="bi bi-info-circle"></i> Usa los botones para calcular rápido o ingresa el precio final manualmente.</small>
+                            </div>
+                            
+                            <div class="mb-3 mt-4">
+                                <div class="form-check form-switch d-flex align-items-center gap-2">
+                                    {{ form.is_active }}
+                                    <label class="form-check-label fw-bold" for="{{ form.is_active.id_for_label }}">
+                                        {{ form.is_active.label }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fila Completa para Descripción -->
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <hr class="my-4">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-primary">{{ form.description.label }} <i class="bi bi-card-text"></i></label>
+                                {{ form.description }}
+                                <small class="text-muted mt-1 d-block">Puedes usar párrafos largos. Se verán reflejados en la página del producto al lado de la imagen.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-5 pt-3 border-top">
+                        <a href="javascript:history.back()" class="btn btn-outline-secondary px-4 py-2 fw-bold">Cancelar y Volver</a>
+                        <button type="submit" class="btn btn-neon px-5 py-2 fw-bold text-dark" style="font-size: 1.1rem;">
+                            <i class="bi bi-save me-2"></i> Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
+
+<!-- Modal para Nueva Categoría -->
+<div class="modal fade" id="categoryModal" tabindex="-1" aria-labelledby="categoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 bg-light">
+                <h5 class="modal-title fw-bold text-primary" id="categoryModalLabel"><i class="bi bi-tags-fill me-2"></i> Añadir Nueva Categoría</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="alert alert-info border-0 bg-opacity-10 text-primary">
+                    <i class="bi bi-info-circle-fill me-2"></i> Las categorías principales están conectadas directamente con el menú superior y las URLs de navegación del sitio.
+                </div>
+                <p>Para añadir una nueva categoría estructural (como "Ropa", "Cuerdas", etc.) contacta a tu equipo de desarrollo o edita los <code>CATEGORY_CHOICES</code> en la base de datos.</p>
+                <div class="form-group mt-3">
+                    <label class="form-label fw-bold">Sugerir Categoría al Administrador:</label>
+                    <input type="text" class="form-control" placeholder="Ej: Ropa de Tenis">
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-success" data-bs-dismiss="modal" onclick="alert('Solicitud enviada al administrador del sistema exitosamente.')">Enviar Solicitud</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function applyDiscount(percentage) {
+    const priceInput = document.getElementById('id_price');
+    const discountInput = document.getElementById('id_discount_price');
+    
+    if (priceInput && priceInput.value) {
+        const originalPrice = parseFloat(priceInput.value);
+        const discountAmount = originalPrice * percentage;
+        const newPrice = originalPrice - discountAmount;
+        
+        // Redondear y actualizar el input de descuento
+        discountInput.value = Math.round(newPrice);
+        
+        // Pequeño efecto visual de feedback
+        discountInput.style.backgroundColor = '#e8f5e9';
+        discountInput.style.transition = 'background-color 0.5s';
+        setTimeout(() => {
+            discountInput.style.backgroundColor = '';
+        }, 800);
+    } else {
+        alert('Por favor, ingresa un Precio Original primero para calcular el descuento.');
+    }
+}
+</script>
+
+<style>
+    .form-switch .form-check-input-lg {
+        width: 3em;
+        height: 1.5em;
+        cursor: pointer;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: var(--ao-neon);
+        box-shadow: 0 0 0 0.25rem rgba(204, 255, 0, 0.25);
+    }
+</style>
 {% endblock %}

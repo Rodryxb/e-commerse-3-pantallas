@@ -4,16 +4,28 @@ from .models import Product
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ['name', 'sku', 'category', 'price', 'discount_price', 'image', 'stock', 'is_active']
+        fields = ['name', 'sku', 'category', 'price', 'discount_price', 'description', 'image', 'stock', 'is_active']
+        labels = {
+            'name': 'Nombre del Producto',
+            'sku': 'Código SKU',
+            'category': 'Categoría',
+            'price': 'Precio Original ($)',
+            'discount_price': 'Precio con Descuento ($)',
+            'description': 'Descripción Detallada',
+            'image': 'Fotografía del Producto',
+            'stock': 'Unidades en Stock',
+            'is_active': 'Producto Activo (Visible)',
+        }
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: Raqueta Wilson...'}),
             'sku': forms.TextInput(attrs={'class': 'form-control'}),
             'category': forms.Select(attrs={'class': 'form-select'}),
-            'price': forms.NumberInput(attrs={'class': 'form-control'}),
-            'discount_price': forms.NumberInput(attrs={'class': 'form-control'}),
+            'price': forms.NumberInput(attrs={'class': 'form-control', 'id': 'id_price'}),
+            'discount_price': forms.NumberInput(attrs={'class': 'form-control', 'id': 'id_discount_price'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Escribe las características del producto aquí...'}),
             'image': forms.FileInput(attrs={'class': 'form-control'}),
             'stock': forms.NumberInput(attrs={'class': 'form-control'}),
-            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input form-check-input-lg'}),
         }
 
 

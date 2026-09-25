@@ -19,9 +19,10 @@
                 </div>
                 <div class="text-end">
                     {% if item.product.discount_price %}
+                        <span class="text-danger small text-decoration-line-through d-block">${{ item.product.price }}</span>
                         <span class="text-success fw-bold d-block">${{ item.product.discount_price }}</span>
                     {% else %}
-                        <span class="text-muted fw-bold d-block">${{ item.product.price }}</span>
+                        <span class="text-dark fw-bold d-block">${{ item.product.price }}</span>
                     {% endif %}
                     <a href="{% url 'eliminar_del_carrito' item.id %}" class="text-danger small text-decoration-none">Quitar</a>
                 </div>

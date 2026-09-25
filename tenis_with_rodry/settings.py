@@ -47,6 +47,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'store.context_processors.cart_count',
+                'store.context_processors.active_store',
             ],
         },
     },
@@ -100,3 +101,6 @@ LOGGING = {
 # Configuración de Correo Electrónico (Backend de Consola para desarrollo local)
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = 'ventas@teniswithrodry.cl'
+
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'

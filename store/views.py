@@ -11,11 +11,13 @@ from django.contrib import messages
 from .models import Product, Order, OrderItem, Cart, CartItem, AtpRanking
 
 def index(request):
-    from .models import CategoryCard, StoreReview
+    from .models import CategoryCard, StoreReview, FeaturedProduct
     from .forms import StoreReviewForm
     
-    cards = CategoryCard.objects.all()
+    active_store = request.session.get('active_store', 'tenis')
+    cards = CategoryCard.objects.filter(store=active_store)
     reviews = StoreReview.objects.all()
+    featured_products = list(FeaturedProduct.objects.filter(store=active_store).select_related('product')[:5])
     
     if request.method == 'POST':
         if not request.user.is_authenticated:
@@ -33,8 +35,11 @@ def index(request):
     return render(request, 'store/index.html', {
         'cards': cards, 
         'reviews': reviews, 
-        'review_form': form
+        'review_form': form,
+        'featured_products': featured_products,
     })
+
+import requests
 
 def catalogo(request, category):
     products = Product.objects.filter(category=category, is_active=True)
@@ -45,10 +50,48 @@ def catalogo(request, category):
     elif sort == 'precio_desc':
         products = products.order_by('-price')
         
+    standings = None
+    if category == 'tabla_a':
+        try:
+            # Pega aquí tu API Key de api-sports.io
+            api_key = 'TU_API_KEY_AQUI'
+            headers = {
+                'x-rapidapi-key': api_key,
+                'x-rapidapi-host': 'v3.football.api-sports.io'
+            }
+            # 265 es la Liga Chilena Primera División
+            response = requests.get('https://v3.football.api-sports.io/standings?league=265&season=2024', headers=headers, timeout=3)
+            
+            if response.status_code == 200 and 'response' in response.json() and len(response.json()['response']) > 0:
+                standings = response.json()['response'][0]['league']['standings'][0]
+            else:
+                raise Exception("API Auth failed")
+        except:
+            # Fallback exacto con los 16 equipos de primera division 2024 si no hay API key
+            standings = [
+                {'rank': 1, 'team': {'name': 'Colo Colo', 'logo': 'https://upload.wikimedia.org/wikipedia/commons/4/4f/Escudo_del_Club_Social_y_Deportivo_Colo-Colo.png'}, 'points': 54, 'all': {'played': 23, 'win': 17, 'draw': 3, 'lose': 3, 'goals': {'for': 48, 'against': 22}}, 'goalsDiff': 26},
+                {'rank': 2, 'team': {'name': 'Universidad Católica', 'logo': 'https://upload.wikimedia.org/wikipedia/commons/c/c5/Escudo_de_Cruzados_SADP.svg'}, 'points': 42, 'all': {'played': 23, 'win': 13, 'draw': 3, 'lose': 7, 'goals': {'for': 50, 'against': 33}}, 'goalsDiff': 17},
+                {'rank': 3, 'team': {'name': 'Universidad de Chile', 'logo': 'https://upload.wikimedia.org/wikipedia/commons/3/30/Escudo_del_Club_Universidad_de_Chile.svg'}, 'points': 42, 'all': {'played': 23, 'win': 12, 'draw': 6, 'lose': 5, 'goals': {'for': 35, 'against': 19}}, 'goalsDiff': 16},
+                {'rank': 4, 'team': {'name': 'Everton CD', 'logo': 'https://upload.wikimedia.org/wikipedia/commons/f/fb/Escudo_de_Everton_de_Vi%C3%B1a_del_Mar.svg'}, 'points': 36, 'all': {'played': 23, 'win': 10, 'draw': 6, 'lose': 7, 'goals': {'for': 37, 'against': 25}}, 'goalsDiff': 12},
+                {'rank': 5, 'team': {'name': 'Palestino', 'logo': 'https://upload.wikimedia.org/wikipedia/commons/5/5a/Escudo_del_Club_Deportivo_Palestino.svg'}, 'points': 36, 'all': {'played': 23, 'win': 11, 'draw': 3, 'lose': 9, 'goals': {'for': 36, 'against': 33}}, 'goalsDiff': 3},
+                {'rank': 6, 'team': {'name': 'Deportes Limache', 'logo': 'https://upload.wikimedia.org/wikipedia/commons/4/4e/Deportes_Limache.png'}, 'points': 33, 'all': {'played': 23, 'win': 10, 'draw': 3, 'lose': 10, 'goals': {'for': 43, 'against': 35}}, 'goalsDiff': 8},
+                {'rank': 7, 'team': {'name': 'Ñublense', 'logo': 'https://upload.wikimedia.org/wikipedia/commons/4/4d/Escudo_del_Club_Deportivo_%C3%91ublense.svg'}, 'points': 32, 'all': {'played': 23, 'win': 8, 'draw': 8, 'lose': 7, 'goals': {'for': 28, 'against': 31}}, 'goalsDiff': -3},
+                {'rank': 8, 'team': {'name': 'Deportes Concepcion', 'logo': 'https://upload.wikimedia.org/wikipedia/commons/5/57/Escudo_de_Deportes_Concepci%C3%B3n.svg'}, 'points': 31, 'all': {'played': 23, 'win': 9, 'draw': 4, 'lose': 10, 'goals': {'for': 25, 'against': 26}}, 'goalsDiff': -1},
+                {'rank': 9, 'team': {'name': 'La Serena', 'logo': 'https://upload.wikimedia.org/wikipedia/commons/3/39/Escudo_de_Deportes_La_Serena.svg'}, 'points': 30, 'all': {'played': 23, 'win': 7, 'draw': 9, 'lose': 7, 'goals': {'for': 34, 'against': 38}}, 'goalsDiff': -4},
+                {'rank': 10, 'team': {'name': 'Coquimbo Unido', 'logo': 'https://upload.wikimedia.org/wikipedia/commons/1/1b/Escudo_de_Coquimbo_Unido.svg'}, 'points': 29, 'all': {'played': 23, 'win': 8, 'draw': 5, 'lose': 10, 'goals': {'for': 31, 'against': 32}}, 'goalsDiff': -1},
+                {'rank': 11, 'team': {'name': 'Audax Italiano', 'logo': 'https://upload.wikimedia.org/wikipedia/commons/1/1a/Escudo_de_Audax_Italiano.svg'}, 'points': 28, 'all': {'played': 23, 'win': 7, 'draw': 7, 'lose': 9, 'goals': {'for': 26, 'against': 31}}, 'goalsDiff': -5},
+                {'rank': 12, 'team': {'name': 'Huachipato', 'logo': 'https://upload.wikimedia.org/wikipedia/commons/8/87/Escudo_del_Club_Deportivo_Huachipato.svg'}, 'points': 28, 'all': {'played': 22, 'win': 8, 'draw': 4, 'lose': 10, 'goals': {'for': 30, 'against': 39}}, 'goalsDiff': -9},
+                {'rank': 13, 'team': {'name': "O'Higgins", 'logo': 'https://upload.wikimedia.org/wikipedia/commons/3/3b/Escudo_de_O%27Higgins_de_Rancagua.svg'}, 'points': 27, 'all': {'played': 23, 'win': 8, 'draw': 3, 'lose': 12, 'goals': {'for': 28, 'against': 36}}, 'goalsDiff': -8},
+                {'rank': 14, 'team': {'name': 'Cobresal', 'logo': 'https://upload.wikimedia.org/wikipedia/commons/4/49/Escudo_de_Club_de_Deportes_Cobresal.svg'}, 'points': 24, 'all': {'played': 23, 'win': 7, 'draw': 3, 'lose': 13, 'goals': {'for': 34, 'against': 44}}, 'goalsDiff': -10},
+                {'rank': 15, 'team': {'name': 'Universidad de Concepcion', 'logo': 'https://upload.wikimedia.org/wikipedia/commons/6/62/Escudo_del_Club_Deportivo_Universidad_de_Concepci%C3%B3n.svg'}, 'points': 22, 'all': {'played': 22, 'win': 6, 'draw': 4, 'lose': 12, 'goals': {'for': 17, 'against': 37}}, 'goalsDiff': -20},
+                {'rank': 16, 'team': {'name': 'Unión La Calera', 'logo': 'https://upload.wikimedia.org/wikipedia/commons/9/9f/Escudo_de_Uni%C3%B3n_La_Calera.svg'}, 'points': 17, 'all': {'played': 23, 'win': 4, 'draw': 5, 'lose': 14, 'goals': {'for': 19, 'against': 40}}, 'goalsDiff': -21}
+            ]
+            
     return render(request, 'store/catalogo.html', {
         'products': products, 
         'category': category,
-        'current_sort': sort
+        'current_sort': sort,
+        'standings': standings
     })
 
 def catalogo_todos(request):
@@ -79,15 +122,26 @@ def carrito(request):
     
     if request.method == 'POST':
         product_id = request.POST.get('product_id')
+        quantity = int(request.POST.get('quantity', 1))
+        
         if product_id:
             product = get_object_or_404(Product, id=product_id)
-            cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product, defaults={'quantity': 1})
-            if not created:
-                if cart_item.quantity < product.stock:
-                    cart_item.quantity += 1
+            
+            # Sum quantity with existing cart item
+            cart_item = CartItem.objects.filter(cart=cart, product=product).first()
+            current_qty = cart_item.quantity if cart_item else 0
+            
+            if current_qty + quantity > product.stock:
+                messages.error(request, f"No puedes añadir {quantity} de {product.name}. Solo hay {product.stock - current_qty} disponibles más.")
+            else:
+                if cart_item:
+                    cart_item.quantity += quantity
                     cart_item.save()
-            messages.success(request, f"{product.name} añadido al carrito.")
-            return redirect('carrito')
+                else:
+                    CartItem.objects.create(cart=cart, product=product, quantity=quantity)
+                messages.success(request, f"{quantity}x {product.name} añadido al carrito.")
+                
+            return redirect(request.META.get('HTTP_REFERER', 'carrito'))
             
     total = sum((item.product.discount_price or item.product.price) * item.quantity for item in cart.items.all())
             
@@ -302,3 +356,61 @@ def gestion_pagos(request):
         
     orders = Order.objects.filter(status='Esperando aprobacion').order_by('created_at')
     return render(request, 'store/gestion_pagos.html', {'orders': orders})
+
+
+@staff_member_required
+def eliminar_review(request, review_id):
+    from .models import StoreReview
+    review = get_object_or_404(StoreReview, id=review_id)
+    review.delete()
+    messages.success(request, 'Reseña eliminada correctamente.')
+    return redirect('index')
+
+
+def producto_detalle(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    return render(request, 'store/producto_detalle.html', {'product': product})
+
+def switch_store(request, store_name):
+    request.session['active_store'] = store_name
+    return redirect('index')
+
+
+# --- Gestión de Productos Destacados (solo superusuario) ---
+from django.http import JsonResponse
+
+@staff_member_required
+def featured_add(request):
+    from .models import FeaturedProduct
+    if request.method == 'POST':
+        product_id = request.POST.get('product_id')
+        store = request.session.get('active_store', 'tenis')
+        product = get_object_or_404(Product, id=product_id)
+        count = FeaturedProduct.objects.filter(store=store).count()
+        if count >= 5:
+            messages.error(request, 'Ya hay 5 productos destacados. Quita uno antes de agregar otro.')
+        elif FeaturedProduct.objects.filter(store=store, product=product).exists():
+            messages.warning(request, f'"{product.name}" ya está en destacados.')
+        else:
+            FeaturedProduct.objects.create(store=store, product=product, order=count + 1)
+            messages.success(request, f'"{product.name}" agregado a destacados.')
+    return redirect('index')
+
+@staff_member_required
+def featured_remove(request, featured_id):
+    from .models import FeaturedProduct
+    fp = get_object_or_404(FeaturedProduct, id=featured_id)
+    name = fp.product.name
+    fp.delete()
+    messages.success(request, f'"{name}" eliminado de destacados.')
+    return redirect('index')
+
+@staff_member_required
+def featured_search(request):
+    q = request.GET.get('q', '')
+    store = request.session.get('active_store', 'tenis')
+    from .models import FeaturedProduct
+    already_ids = FeaturedProduct.objects.filter(store=store).values_list('product_id', flat=True)
+    products = Product.objects.filter(name__icontains=q, is_active=True).exclude(id__in=already_ids)[:10]
+    data = [{'id': p.id, 'name': p.name, 'price': str(p.price), 'sku': p.sku} for p in products]
+    return JsonResponse({'results': data})

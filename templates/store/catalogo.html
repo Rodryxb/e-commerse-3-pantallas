@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-    <h2 class="text-capitalize m-0">{{ category }}</h2>
+    <h2 class="text-capitalize m-0">{% if category == 'tabla_a' %}Posiciones de la Primera División: Liga Chilena 2026{% else %}{{ category }}{% endif %}</h2>
     <div class="d-flex gap-3 align-items-center flex-wrap">
+        {% if category != 'tabla_a' %}
         <form method="GET" class="d-flex align-items-center m-0">
             {% if current_q %}
                 <input type="hidden" name="q" value="{{ current_q }}">
@@ -14,30 +15,81 @@
                 <option value="precio_desc" {% if current_sort == 'precio_desc' %}selected{% endif %}>Precio: Mayor a Menor</option>
             </select>
         </form>
+        {% endif %}
         {% if user.is_staff %}
             <a href="{% url 'product_create' %}" class="btn btn-primary text-nowrap">+ Añadir Producto</a>
         {% endif %}
     </div>
 </div>
 
+{% if standings %}
+<div class="card shadow-sm border-0 mb-5 rounded-4 overflow-hidden">
+    <div class="card-header text-white p-3 d-flex justify-content-between align-items-center" style="background-color: var(--ao-navy);">
+        <h4 class="mb-0 fw-bold"><i class="bi bi-trophy-fill text-warning me-2"></i> Primera División (Chile)</h4>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover table-striped mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th class="text-center" style="width: 50px;">Pos</th>
+                    <th>Club</th>
+                    <th class="text-center">PTS</th>
+                    <th class="text-center d-none d-md-table-cell">J</th>
+                    <th class="text-center d-none d-md-table-cell">G</th>
+                    <th class="text-center d-none d-md-table-cell">E</th>
+                    <th class="text-center d-none d-md-table-cell">P</th>
+                    <th class="text-center d-none d-md-table-cell">GF</th>
+                    <th class="text-center d-none d-md-table-cell">GC</th>
+                    <th class="text-center d-none d-md-table-cell">DIF</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for team in standings %}
+                <tr>
+                    <td class="text-center fw-bold">{{ team.rank }}</td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="fw-bold">{{ team.team.name }}</span>
+                        </div>
+                    </td>
+                    <td class="text-center fw-bolder fs-5 text-dark">{{ team.points }}</td>
+                    <td class="text-center text-muted d-none d-md-table-cell">{{ team.all.played }}</td>
+                    <td class="text-center text-muted d-none d-md-table-cell">{{ team.all.win }}</td>
+                    <td class="text-center text-muted d-none d-md-table-cell">{{ team.all.draw }}</td>
+                    <td class="text-center text-muted d-none d-md-table-cell">{{ team.all.lose }}</td>
+                    <td class="text-center text-muted d-none d-md-table-cell">{{ team.all.goals.for }}</td>
+                    <td class="text-center text-muted d-none d-md-table-cell">{{ team.all.goals.against }}</td>
+                    <td class="text-center fw-bold d-none d-md-table-cell {% if team.goalsDiff > 0 %}text-success{% elif team.goalsDiff < 0 %}text-danger{% endif %}">{% if team.goalsDiff > 0 %}+{% endif %}{{ team.goalsDiff }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
 <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
     {% for product in products %}
     <div class="col">
-        <div class="card h-100 position-relative">
+        <div class="card h-100 position-relative hover-card">
             {% if product.discount_price %}
-                <span class="badge badge-oferta">OFERTA</span>
+                <span class="badge badge-oferta shadow-sm px-2 py-1 fs-6">-{{ product.discount_percentage }}%</span>
             {% endif %}
             
-            {% if product.image %}
-                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 250px; object-fit: cover;">
-            {% else %}
-                <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 250px;">Sin Imagen</div>
-            {% endif %}
+            <div style="overflow: hidden; cursor: pointer;" onclick="window.location.href='{% url 'producto_detalle' product.id %}'">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" class="card-img-top hover-zoom-img" alt="{{ product.name }}" style="height: 250px; object-fit: cover;">
+                {% else %}
+                    <div class="bg-secondary text-white d-flex align-items-center justify-content-center hover-zoom-img" style="height: 250px;">Sin Imagen</div>
+                {% endif %}
+            </div>
 
-            <div class="card-body text-center d-flex flex-column">
-                <h5 class="card-title">{{ product.name }}</h5>
+            <div class="card-body text-center d-flex flex-column z-3 bg-white">
+                <a href="{% url 'producto_detalle' product.id %}" class="text-decoration-none text-dark hover-opacity-75">
+                    <h5 class="card-title fw-bold">{{ product.name }}</h5>
+                </a>
                 {% if product.discount_price %}
-                    <p class="text-muted text-decoration-line-through mb-0">${{ product.price }}</p>
+                    <p class="text-danger text-decoration-line-through mb-0">${{ product.price }}</p>
                     <h4 class="text-success">${{ product.discount_price }}</h4>
                 {% else %}
                     <h4>${{ product.price }}</h4>
@@ -52,11 +104,19 @@
                     </div>
                     {% endif %}
 
-                    <form method="POST" action="/carrito/">
+                    {% if product.stock > 0 %}
+                    <form method="POST" action="/carrito/" class="d-flex flex-column gap-2">
                         {% csrf_token %}
                         <input type="hidden" name="product_id" value="{{ product.id }}">
-                        <button class="btn btn-neon w-100 mt-2">Añadir al Carrito</button>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-light">Cant:</span>
+                            <input type="number" name="quantity" class="form-control text-center" value="1" min="1" max="{{ product.stock }}">
+                        </div>
+                        <button class="btn btn-neon w-100">Añadir al Carrito</button>
                     </form>
+                    {% else %}
+                    <button class="btn btn-secondary w-100 mt-2" disabled>Agotado</button>
+                    {% endif %}
                 </div>
             </div>
         </div>

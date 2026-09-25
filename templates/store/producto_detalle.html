@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="product-detail-wrapper" style="background: linear-gradient(135deg, var(--ao-navy) 0%, var(--ao-blue) 100%); min-height: calc(100vh - 100px); padding: 50px 0; margin-top: -1.5rem; margin-left: calc(-50vw + 50%); width: 100vw; box-sizing: border-box;">
+    <div class="container">
+        <!-- Navegación de migas de pan -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/" class="text-white text-decoration-none opacity-75 hover-opacity-100">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'catalogo' product.category %}" class="text-white text-decoration-none opacity-75 hover-opacity-100 text-capitalize">{{ product.category }}</a></li>
+                <li class="breadcrumb-item active text-white fw-bold" aria-current="page">{{ product.name }}</li>
+            </ol>
+        </nav>
+        
+        <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+            <div class="row g-0">
+                <!-- Imagen -->
+                <div class="col-md-5 bg-white d-flex align-items-center justify-content-center p-5 border-end">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid" style="max-height: 400px; object-fit: contain;">
+                    {% else %}
+                        <div class="text-muted">Sin imagen</div>
+                    {% endif %}
+                </div>
+                
+                <!-- Detalles -->
+                <div class="col-md-7 bg-white p-5">
+                    <h2 class="fw-bolder mb-3" style="color: var(--ao-navy);">{{ product.name }}</h2>
+                    <p class="text-muted small mb-4">SKU: {{ product.sku }} | Categoría: <span class="text-capitalize">{{ product.category }}</span></p>
+                    
+                    <div class="mb-4">
+                        {% if product.description %}
+                            <p class="text-secondary lh-lg text-justify" style="font-size: 1.05rem; text-align: justify;">{{ product.description|linebreaksbr }}</p>
+                        {% else %}
+                            <p class="text-secondary fst-italic">Sin descripción disponible.</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-4">
+                        {% if product.discount_price %}
+                            <h5 class="text-danger text-decoration-line-through mb-1">${{ product.price }}</h5>
+                            <h1 class="text-success fw-bolder mb-0">${{ product.discount_price }}</h1>
+                        {% else %}
+                            <h1 class="fw-bolder mb-0" style="color: var(--ao-navy);">${{ product.price }}</h1>
+                        {% endif %}
+                    </div>
+                    
+                    <hr class="mb-4">
+                    
+                    <div class="d-flex flex-column gap-3 max-w-sm">
+                        {% if product.stock > 0 %}
+                            <p class="mb-0 text-muted"><strong>Stock Disponible:</strong> {{ product.stock }} unidades</p>
+                            <form method="POST" action="/carrito/" class="d-flex align-items-center gap-3">
+                                {% csrf_token %}
+                                <input type="hidden" name="product_id" value="{{ product.id }}">
+                                <div class="input-group" style="width: 140px;">
+                                    <span class="input-group-text bg-light text-muted">Cant</span>
+                                    <input type="number" name="quantity" class="form-control text-center" value="1" min="1" max="{{ product.stock }}">
+                                </div>
+                                <button type="submit" class="btn btn-neon fw-bold px-4 py-2 flex-grow-1" style="font-size: 1.1rem;">Añadir al Carrito</button>
+                            </form>
+                        {% else %}
+                            <div class="alert alert-danger mb-0 text-center fw-bold">Agotado Temporalmente</div>
+                        {% endif %}
+                    </div>
+                    
+                    {% if user.is_staff %}
+                        <div class="mt-4 pt-3 border-top">
+                            <a href="{% url 'product_update' product.id %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-pencil"></i> Editar Producto (SuperUsuario)</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

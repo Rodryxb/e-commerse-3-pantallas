@@ -7,18 +7,36 @@ class Product(models.Model):
         ('raquetas', 'Raquetas'),
         ('pelotas', 'Pelotas'),
         ('zapatillas', 'Zapatillas'),
-        ('extras', 'Extras'),
+        ('accesorios', 'Accesorios'),
+        ('zapatos_futbol', 'Zapatos Fútbol'),
+        ('balones_futbol', 'Balones Fútbol'),
+        ('equipamiento', 'Equipamiento'),
+        ('entrenamiento', 'Entrenamiento'),
+        ('tabla_a', 'Tabla A'),
+        ('tillas', 'Tillas'),
+        ('ropa_superior', 'Ropa Superior'),
+        ('ropa_inferior', 'Ropa Inferior'),
+        ('gorros', 'Gorros'),
+        ('relojes', 'Relojes'),
     ]
     name = models.CharField(max_length=200)
     sku = models.CharField(max_length=50, unique=True)
     category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, db_index=True)
     price = models.DecimalField(max_digits=10, decimal_places=0)
     discount_price = models.DecimalField(max_digits=10, decimal_places=0, null=True, blank=True)
+    description = models.TextField(blank=True, null=True)
     image = models.ImageField(upload_to='products/', null=True, blank=True)
     stock = models.PositiveIntegerField()
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+    @property
+    def discount_percentage(self):
+        if self.price and self.discount_price and self.price > self.discount_price:
+            return int(((self.price - self.discount_price) / self.price) * 100)
+        return 0
 
     def __str__(self):
         return f"{self.sku} - {self.name}"
@@ -68,6 +86,8 @@ class AtpRanking(models.Model):
 
 
 class CategoryCard(models.Model):
+    STORE_CHOICES = [('tenis', 'Tenis'), ('futbol', 'Fútbol'), ('meo_corte', 'Meo Corte')]
+    store = models.CharField(max_length=15, choices=STORE_CHOICES, default='tenis')
     title = models.CharField(max_length=50)
     url = models.CharField(max_length=100)
     image = models.ImageField(upload_to='categories/', null=True, blank=True)
@@ -75,6 +95,13 @@ class CategoryCard(models.Model):
 
     class Meta:
         ordering = ['order']
+
+
+    @property
+    def discount_percentage(self):
+        if self.price and self.discount_price and self.price > self.discount_price:
+            return int(((self.price - self.discount_price) / self.price) * 100)
+        return 0
 
     def __str__(self):
         return self.title
@@ -88,5 +115,27 @@ class StoreReview(models.Model):
     class Meta:
         ordering = ['-created_at']
 
+
+    @property
+    def discount_percentage(self):
+        if self.price and self.discount_price and self.price > self.discount_price:
+            return int(((self.price - self.discount_price) / self.price) * 100)
+        return 0
+
     def __str__(self):
         return f"Reseña de {self.user.username}"
+
+
+class FeaturedProduct(models.Model):
+    STORE_CHOICES = [('tenis', 'Tenis'), ('futbol', 'Fútbol'), ('meo_corte', 'Meo Corte')]
+    store = models.CharField(max_length=15, choices=STORE_CHOICES, default='tenis')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='featured_in')
+    order = models.PositiveSmallIntegerField(default=0, help_text='Orden de aparición (menor = primero)')
+
+    class Meta:
+        ordering = ['store', 'order']
+        verbose_name = 'Producto Destacado'
+        verbose_name_plural = 'Productos Destacados'
+
+    def __str__(self):
+        return f"[{self.get_store_display()}] {self.product.name} (#{self.order})"
