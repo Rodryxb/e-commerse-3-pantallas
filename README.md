@@ -1,97 +1,89 @@
-# 🎾 Tenis with Rodry | E-Commerce
+# 🪐 Multiverso E-Commerce | 3 Tiendas en 1
+**Tenis with Rodry | Fútbol with Rodry | Mundo Meo Corte**
 
-**Tenis with Rodry** es una plataforma de E-Commerce completa y profesional desarrollada en **Python (Django)** orientada a la venta de artículos de tenis (raquetas, pelotas, zapatillas y accesorios).
-
-El sistema no solo funciona como un catálogo, sino que cuenta con un sistema robusto de carritos de compra, gestión de usuarios, roles de administrador, y automatización de boletas en PDF enviadas directamente al correo del cliente.
+Este proyecto es una plataforma de E-Commerce avanzada desarrollada en **Python (Django)** que implementa un innovador sistema de "Universos Paralelos". Utilizando un único carrito de compras y una misma base de datos centralizada, la interfaz gráfica de la tienda se transforma por completo (estilos, logos, categorías y productos) dependiendo del "Mundo" en el que el cliente decida adentrarse.
 
 ---
 
-## ✨ Características Principales (Features)
+## ✨ Nuevas Características del Multiverso
 
-* 🛒 **Carrito de Compras Dinámico:** Cálculo en tiempo real de subtotales, detección inteligente de precios con descuento y validación de stock.
-* 🔐 **Sistema de Usuarios y Roles:** Registro de clientes y portal de administrador (Superusuario).
-* 💳 **Flujo de Checkout y Auditoría:** Los pedidos nacen en estado *"Esperando aprobación"*. El administrador cuenta con un panel especial para verificar las transferencias y aprobar los despachos con un clic.
-* 📧 **Generación de PDFs y Correos:** Al aprobarse un pago, el sistema dibuja automáticamente una boleta en PDF (`ReportLab`) y se la envía al cliente por correo electrónico informando el despacho en 24 horas.
-* 📊 **Panel de Business Intelligence:** Generación instantánea de reportes CSV exportables para Excel con métricas de inventario (Estado, Stock Crítico, Valorización de Bodega).
-* 🏆 **Integración de API Externa:** Conexión en tiempo real a la API de ESPN para mostrar el Ranking ATP actualizado de los mejores tenistas del mundo.
-* 🔍 **Buscador Inteligente y Filtros:** Buscador global de productos y filtros de ordenamiento por precio.
-* ⭐ **Sistema de Reseñas:** Muro público de reseñas de clientes.
+* 🌌 **Motor de Temas (Theme Engine):** Cambio instantáneo de variables CSS y diseño. 
+  - **Tenis:** Estilo Índigo Oscuro y Neón Cyan 🎾
+  - **Fútbol:** Estilo Verde Cancha y Lima Neón ⚽
+  - **Meo Corte:** Estilo Dark Clásico y Oro (Dorado) 💎
+* 🎛️ **Portales Flotantes Globales:** Una torre lateral "efecto espejo" anclada a la derecha de la pantalla que permite al usuario saltar de un universo a otro con un solo clic, de forma simétrica.
+* ⭐ **Vitrina de Destacados Interactiva:** Un carrusel de productos rotativos en la página principal con **efecto fade-in y temporizador (barra de progreso)**. 
+* 🛠️ **Panel CRUD en Vivo (Superusuario):** El administrador puede agregar, buscar con autocompletado y eliminar los productos destacados directamente desde la página de inicio, sin entrar al backend de Django.
+* 🏆 **Estadísticas y Tablas:**
+  - Integración del ranking ATP en tiempo real para el mundo Tenis.
+  - Tabla de posiciones exacta de la Primera División Chilena (Campeonato Nacional) para el mundo Fútbol.
+* 🛒 **Carrito Global:** Puedes añadir unas zapatillas de Tenis, una pelota de Fútbol y un Reloj de Meo Corte; todo viaja en el mismo carrito para un checkout unificado.
+* 📧 **Generación de PDFs y Correos:** Al aprobar un pedido (transferencia), el sistema emite una boleta dinámica vía `ReportLab` y se envía automáticamente al correo del cliente.
 
 ---
 
 ## 🛠️ Tecnologías Utilizadas
 
 * **Backend:** Python, Django 5.x
-* **Base de Datos:** SQLite (Migrable a PostgreSQL para producción)
-* **Frontend:** HTML5, CSS3, Bootstrap 5
-* **Librerías Adicionales:** 
-  * `ReportLab` (Generación de PDFs)
-  * `Requests` (Consumo de APIs externas)
-  * `Pillow` (Procesamiento de imágenes)
+* **Base de Datos:** SQLite (Preparado para PostgreSQL)
+* **Frontend:** HTML5, CSS3, Bootstrap 5 + JS Vanilla (Animaciones)
+* **Librerías Extra:** `ReportLab`, `Requests`, `Pillow`
 
 ---
 
-## 🚀 Guía de Instalación (Paso a Paso)
+## 🚀 Guía de Instalación Rápida
 
-Sigue estos pasos para hacer correr el proyecto localmente en cualquier computador:
+Sigue estos pasos para arrancar el Multiverso en tu computador:
 
 ### 1. Clonar el Repositorio
-Abre tu terminal y descarga el proyecto:
 ```bash
-git clone https://github.com/Rodryxb/tenis_with_rodry.git
+git clone https://github.com/Rodryxb/e-commerse-3-pantallas.git
 cd tenis_with_rodry
 ```
 
-### 2. Crear un Entorno Virtual
-Es una buena práctica encapsular las librerías del proyecto.
-* En **Windows**:
+### 2. Crear y Activar Entorno Virtual
+* **En Windows (PowerShell/CMD):**
   ```bash
   python -m venv venv
   .\venv\Scripts\activate
   ```
-* En **Mac/Linux**:
+* **En Mac/Linux:**
   ```bash
   python3 -m venv venv
   source venv/bin/activate
   ```
 
-### 3. Instalar las Dependencias
-Con el entorno virtual activado, instala todas las librerías necesarias ejecutando:
+### 3. Instalar Dependencias
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Configurar la Base de Datos
-Ejecuta las migraciones para construir la estructura de la base de datos:
+### 4. Construir Base de Datos y Poblar
 ```bash
 python manage.py migrate
 ```
 
-### 5. Crear un Usuario Administrador (Superuser)
-Para poder acceder a los botones exclusivos de administrador (Gestión de Pagos, Descarga de Stock, etc.), crea tu cuenta maestra:
+### 5. Crear el Administrador del Multiverso (Superuser)
+Obligatorio para que puedas ver el panel interactivo de productos destacados en la pantalla principal:
 ```bash
 python manage.py createsuperuser
 ```
-*(Te pedirá un nombre de usuario, correo y contraseña. Ojo: cuando escribes la contraseña en la consola no se ve, pero sí se está escribiendo).*
 
-### 6. Obtener Datos del Ranking ATP (Opcional)
-Para que la tabla de ranking no esté vacía, corre nuestro comando personalizado que consulta a la API de ESPN:
+### 6. Obtener Ranking de Tenis (Opcional)
 ```bash
 python manage.py importar_ranking
 ```
 
-### 7. Levantar el Servidor
-¡Todo listo! Enciende el motor del proyecto:
+### 7. Levantar Servidor
 ```bash
 python manage.py runserver
 ```
-Entra a tu navegador web favorito y visita `http://127.0.0.1:8000/`.
+Entra a `http://127.0.0.1:8000/` y navega entre los tres mundos usando la torre de portales a la derecha.
 
 ---
 
-## 💻 Panel de Administración
+## 💻 Panel de Administración y Funciones Clave
 
-Una vez que el servidor esté corriendo, puedes:
-1. Iniciar sesión con tu cuenta de administrador en la página normal.
-2. Usar los botones amarillos de la barra de navegación para **Revisar Transferencias** o descargar el **Stock en CSV**.
-3. O si prefieres la vista de base de datos cruda, ve a `http://127.0.0.1:8000/admin/`.
+* **Vitrina en Vivo:** Inicia sesión con la cuenta de superusuario y ve al inicio (`/`). Verás el panel **"Gestionar Productos Destacados"**. Busca productos en el input y agrégalos para armar la vitrina (hasta 5 por universo).
+* **Gestión de Pagos:** Botón amarillo en la barra superior (solo superusuario) para auditar ventas, descargar PDFs y aprobar despachos.
+* **Descarga de Stock:** Reporte instantáneo de inventario en archivo Excel/CSV.
